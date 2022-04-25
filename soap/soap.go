@@ -484,6 +484,10 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 	defer res.Body.Close()
 
+	body, _ := ioutil.ReadAll(res.Body)
+	aux := string(body)
+	fmt.Println(aux)
+
 	if res.StatusCode >= 400 {
 		body, _ := ioutil.ReadAll(res.Body)
 		return &HTTPError{
