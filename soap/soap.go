@@ -22,8 +22,12 @@ type SOAPDecoder interface {
 }
 
 type SOAPEnvelopeResponse struct {
-	XMLName     xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Header      *SOAPHeaderResponse
+	XMLName         xml.Name `xml:"soap-env:Envelope"`
+	XmlnsXsiSoapEnv string   `xml:"xmlns:soap-env,attr"`
+	XmlnsXsd        string   `xml:"xmlns:xsd,attr"`
+	XmlnsXsi        string   `xml:"xmlns:xsi,attr"`
+	XmlnsSoapEnc    string   `xml:"xmlns:soap-enc,attr"`
+
 	Body        SOAPBodyResponse
 	Attachments []MIMEMultipartAttachment `xml:"attachments,omitempty"`
 }
@@ -60,11 +64,8 @@ type SOAPBody struct {
 }
 
 type SOAPBodyResponse struct {
-	XMLName xml.Name `xml:"soap:Body"`
+	XMLName xml.Name `xml:"soap-env:Body"`
 	Body    interface{}
-
-	faultOccurred bool
-	Fault         *SOAPFault `xml:",omitempty"`
 }
 
 type MIMEMultipartAttachment struct {
@@ -101,12 +102,6 @@ Loop:
 			} else if se.Name.Space == "http://schemas.xmlsoap.org/soap/envelope/" && se.Name.Local == "Fault" {
 				b.Body = nil
 
-				b.faultOccurred = true
-				err = d.DecodeElement(b.Fault, &se)
-				if err != nil {
-					return err
-				}
-
 				consumed = true
 			} else {
 				if err = d.DecodeElement(b.Body, &se); err != nil {
@@ -132,10 +127,6 @@ func (b *SOAPBody) ErrorFromFault() error {
 }
 
 func (b *SOAPBodyResponse) ErrorFromFault() error {
-	if b.faultOccurred {
-		return b.Fault
-	}
-	b.Fault = nil
 	return nil
 }
 
@@ -503,12 +494,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	// xml Decoder (used with and without MTOM) cannot handle namespace prefixes (yet),
 	// so we have to use a namespace-less response envelope
 	respEnvelope := new(SOAPEnvelopeResponse)
-	respEnvelope.Body = SOAPBodyResponse{
-		Body: response,
-		Fault: &SOAPFault{
-			Detail: faultDetail,
-		},
-	}
+	respEnvelope.Body = SOAPBodyResponse{Body: response}
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
