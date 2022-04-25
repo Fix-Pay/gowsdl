@@ -22,11 +22,11 @@ type SOAPDecoder interface {
 }
 
 type SOAPEnvelopeResponse struct {
-	XMLName         xml.Name `xml:"soap-env:Envelope"`
-	XmlnsXsiSoapEnv string   `xml:"xmlns:soap-env,attr"`
-	XmlnsXsd        string   `xml:"xmlns:xsd,attr"`
-	XmlnsXsi        string   `xml:"xmlns:xsi,attr"`
-	XmlnsSoapEnc    string   `xml:"xmlns:soap-enc,attr"`
+	XMLName      xml.Name `xml:"soap-env:Envelope"`
+	XmlnsSoapEnv string   `xml:"xmlns:soap-env,attr"`
+	XmlnsXsd     string   `xml:"xmlns:xsd,attr"`
+	XmlnsXsi     string   `xml:"xmlns:xsi,attr"`
+	XmlnsSoapEnc string   `xml:"xmlns:soap-enc,attr"`
 
 	Body        SOAPBodyResponse
 	Attachments []MIMEMultipartAttachment `xml:"attachments,omitempty"`
@@ -181,6 +181,7 @@ const (
 	XmlNsXsiEnv     string = "http://www.w3.org/2001/XMLSchema-instance"
 	XmlNsXsdEnv     string = "http://www.w3.org/2001/XMLSchema"
 	XmlNsSoapEnv    string = "http://schemas.xmlsoap.org/soap/envelope/"
+	XmlNsSoapEnc    string = "http://schemas.xmlsoap.org/soap/encoding/"
 	XmlNsUrnEnv     string = "urn:AGIntf-IAG"
 )
 
@@ -493,7 +494,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	// xml Decoder (used with and without MTOM) cannot handle namespace prefixes (yet),
 	// so we have to use a namespace-less response envelope
-	respEnvelope := new(SOAPEnvelopeResponse)
+	respEnvelope := SOAPEnvelopeResponse{
+		XmlnsSoapEnv: XmlNsSoapEnv,
+		XmlnsXsd:     XmlNsXsdEnv,
+		XmlnsXsi:     XmlNsXsiEnv,
+		XmlnsSoapEnc: XmlNsSoapEnc,
+	}
 	respEnvelope.Body = SOAPBodyResponse{Body: response}
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
