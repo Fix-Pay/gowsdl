@@ -528,5 +528,16 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
+
+	buffer = new(bytes.Buffer)
+	encoder = xml.NewEncoder(buffer)
+	if err := encoder.Encode(respEnvelope); err != nil {
+		return err
+	}
+	if err := encoder.Flush(); err != nil {
+		return err
+	}
+
+
 	return respEnvelope.Body.ErrorFromFault()
 }
