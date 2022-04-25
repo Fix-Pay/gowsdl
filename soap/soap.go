@@ -525,14 +525,10 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(body)
+	aux := string(body)
+	fmt.Println(aux)
 
-    var dst interface{}
-	if err = xml.NewDecoder(res.Body).DecodeElement(dst, nil); err != nil {
-		return err
-	}
-
-	responseAux := new(string)
+    responseAux := new(string)
 	if err = dec.Decode(&responseAux); err != nil {
 		return err
 	}
