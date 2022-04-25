@@ -528,7 +528,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	aux := string(body)
 	fmt.Println(aux)
 
-	if err = dec.Decode(&response); err != nil {
+	if err = dec.Decode(&respEnvelope); err != nil {
 		return err
 	}
 
