@@ -515,7 +515,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		}
 	}
 
-	responseAux := new(string)
+	var responseAux interface{}
 	if mtomBoundary != "" {
 		err = newMtomDecoder(res.Body, mtomBoundary).Decode(&responseAux)
 	} else if mmaBoundary != "" {
