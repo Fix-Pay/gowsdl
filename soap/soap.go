@@ -515,16 +515,17 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		}
 	}
 
-	var responseAux interface{}
+	var dec SOAPDecoder
 	if mtomBoundary != "" {
-		err = newMtomDecoder(res.Body, mtomBoundary).Decode(&responseAux)
+		dec = newMtomDecoder(res.Body, mtomBoundary)
 	} else if mmaBoundary != "" {
-		err = newMmaDecoder(res.Body, mmaBoundary).Decode(&responseAux)
+		dec = newMmaDecoder(res.Body, mmaBoundary)
 	} else {
-		err = xml.NewDecoder(res.Body).Decode(&responseAux)
+		dec = xml.NewDecoder(res.Body)
 	}
 
-	if err != nil {
+	responseAux := new(string)
+	if err = dec.Decode(&responseAux); err != nil {
 		return err
 	}
 
