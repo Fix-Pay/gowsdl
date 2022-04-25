@@ -525,7 +525,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	responseAux := new(string)
-	if err := dec.Decode(responseAux); err != nil {
+	if err := dec.Decode(&responseAux); err != nil {
 		return err
 	}
 
