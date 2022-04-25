@@ -107,7 +107,6 @@ func getMmaHeader(contentType string) (string, error) {
 }
 
 func (d *mmaDecoder) Decode(v interface{}) error {
-	soapEnvResp := v.(*SOAPEnvelopeResponse)
 	attachments := make([]MIMEMultipartAttachment, 0)
 	for {
 		p, err := d.reader.NextPart()
@@ -141,9 +140,6 @@ func (d *mmaDecoder) Decode(v interface{}) error {
 				Data: content,
 			})
 		}
-	}
-	if len(attachments) > 0 {
-		soapEnvResp.Attachments = attachments
 	}
 
 	return nil
