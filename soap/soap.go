@@ -28,8 +28,7 @@ type SOAPEnvelopeResponse struct {
 	XmlnsXsi     string   `xml:"xmlns:xsi,attr"`
 	XmlnsSoapEnc string   `xml:"xmlns:soap-enc,attr"`
 
-	Body        SOAPBodyResponse
-	Attachments []MIMEMultipartAttachment `xml:"attachments,omitempty"`
+	Body SOAPBodyResponse
 }
 
 type SOAPEnvelope struct {
@@ -64,8 +63,9 @@ type SOAPBody struct {
 }
 
 type SOAPBodyResponse struct {
-	XMLName xml.Name `xml:"soap-env:Body"`
-	Body    interface{}
+	XMLName       xml.Name `xml:"soap-env:Body"`
+	EncodingStyle string   `xml:"soap-enc,attr"`
+	Body          interface{}
 }
 
 type MIMEMultipartAttachment struct {
@@ -500,7 +500,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		XmlnsXsi:     XmlNsXsiEnv,
 		XmlnsSoapEnc: XmlNsSoapEnc,
 	}
-	respEnvelope.Body = SOAPBodyResponse{Body: response}
+	respEnvelope.Body = SOAPBodyResponse{Body: response, EncodingStyle: "http://schemas.xmlsoap.org/soap/envelope/"}
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
@@ -528,8 +528,5 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
-	if respEnvelope.Attachments != nil {
-		*retAttachments = respEnvelope.Attachments
-	}
 	return respEnvelope.Body.ErrorFromFault()
 }
