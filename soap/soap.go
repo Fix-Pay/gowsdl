@@ -524,7 +524,8 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		dec = xml.NewDecoder(res.Body)
 	}
 
-	if err := dec.Decode(respEnvelope); err != nil {
+	responseAux := new(string)
+	if err := dec.Decode(responseAux); err != nil {
 		return err
 	}
 
