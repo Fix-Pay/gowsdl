@@ -439,13 +439,6 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
-	var dec SOAPDecoder
-	if err := dec.Decode(buffer); err != nil {
-		return err
-	}
-	fmt.Println(dec)
-
-
 	req, err := http.NewRequest("POST", s.url, buffer)
 	if err != nil {
 		return err
@@ -522,16 +515,16 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		}
 	}
 
+	responseAux := new(string)
 	if mtomBoundary != "" {
-		dec = newMtomDecoder(res.Body, mtomBoundary)
+		err = newMtomDecoder(res.Body, mtomBoundary).Decode(&responseAux)
 	} else if mmaBoundary != "" {
-		dec = newMmaDecoder(res.Body, mmaBoundary)
+		err = newMmaDecoder(res.Body, mmaBoundary).Decode(&responseAux)
 	} else {
-		dec = xml.NewDecoder(res.Body)
+		err = xml.NewDecoder(res.Body).Decode(&responseAux)
 	}
 
-	responseAux := new(string)
-	if err := dec.Decode(&responseAux); err != nil {
+	if err != nil {
 		return err
 	}
 
