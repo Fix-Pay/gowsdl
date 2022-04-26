@@ -22,11 +22,7 @@ type SOAPDecoder interface {
 }
 
 type SOAPEnvelopeResponse struct {
-	XMLName      xml.Name `xml:"soap-env:Envelope"`
-	XmlnsSoapEnv string   `xml:"xmlns:soap-env,attr"`
-	XmlnsXsd     string   `xml:"xmlns:xsd,attr"`
-	XmlnsXsi     string   `xml:"xmlns:xsi,attr"`
-	XmlnsSoapEnc string   `xml:"xmlns:soap-enc,attr"`
+	XMLName      xml.Name `xml:"Envelope"`
 
 	Body SOAPBodyResponse
 }
@@ -63,8 +59,8 @@ type SOAPBody struct {
 }
 
 type SOAPBodyResponse struct {
-	XMLName       xml.Name `xml:"soap-env:Body"`
-	EncodingStyle string   `xml:"soap-enc,attr"`
+	XMLName       xml.Name `xml:"Body"`
+
 	Body          interface{}
 }
 
@@ -494,13 +490,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	// xml Decoder (used with and without MTOM) cannot handle namespace prefixes (yet),
 	// so we have to use a namespace-less response envelope
-	respEnvelope := SOAPEnvelopeResponse{
-		XmlnsSoapEnv: XmlNsSoapEnv,
-		XmlnsXsd:     XmlNsXsdEnv,
-		XmlnsXsi:     XmlNsXsiEnv,
-		XmlnsSoapEnc: XmlNsSoapEnc,
-	}
-	respEnvelope.Body = SOAPBodyResponse{Body: response, EncodingStyle: "http://schemas.xmlsoap.org/soap/envelope/"}
+	respEnvelope := SOAPEnvelopeResponse{}
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
