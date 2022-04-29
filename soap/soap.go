@@ -488,10 +488,6 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		}
 	}
 
-	// xml Decoder (used with and without MTOM) cannot handle namespace prefixes (yet),
-	// so we have to use a namespace-less response envelope
-	respEnvelope := SOAPEnvelopeResponse{}
-
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
 		return err
@@ -514,20 +510,8 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		dec = xml.NewDecoder(res.Body)
 	}
 
-	if err := dec.Decode(&respEnvelope); err != nil {
+	if err := dec.Decode(&response); err != nil {
 		return err
 	}
-
-
-	buffer = new(bytes.Buffer)
-	encoder = xml.NewEncoder(buffer)
-	if err := encoder.Encode(respEnvelope); err != nil {
-		return err
-	}
-	if err := encoder.Flush(); err != nil {
-		return err
-	}
-
-
-	return respEnvelope.Body.ErrorFromFault()
+	return err
 }
